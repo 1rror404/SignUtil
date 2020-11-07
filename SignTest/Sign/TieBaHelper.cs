@@ -1,4 +1,6 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SignTest.API;
 using SignTest.Model;
 using System;
@@ -6,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,8 +43,148 @@ namespace SignTest.Sign
                 Console.WriteLine("获取贴吧有误");
                 throw;
             }
-         
+          
             return TieBaList;
+        }
+
+
+        //签到所有吧
+        public static void SignAllTieBa(string bduss)
+        {
+            List<MyTieBa> tiebaList = TieBaHelper.GetUserTieBa(bduss);
+            for (int i = 0; i < tiebaList.Count; i++)
+            {
+                string fid = TieBaHelper.GetFid(tiebaList[i].TBName);
+                JObject result = (JObject)JsonConvert.DeserializeObject(TieBaHelper.ClientSignTest(fid, tiebaList[i].TBName, bduss));
+                string code = result["error_code"].ToString();
+                if (code == "0")
+                { 
+                    Console.WriteLine(tiebaList[i].TBName + ":签到成功");
+                }
+                else
+                {
+                    string msg = result["error_msg"].ToString();
+                    Console.WriteLine(tiebaList[i].TBName + ":" + msg);
+                }
+
+            }
+        }
+
+        //客户端签到
+        public static string ClientSignTest(string fid, string kw, string bduss)
+        {
+            Dictionary<string, string> postDic = new Dictionary<string, string>();
+            postDic.Add("BDUSS", bduss.Replace("BDUSS=", ""));
+            postDic.Add("_client_id", "03-00-DA-59-05-00-72-96-06-00-01-00-04-00-4C-43-01-00-34-F4-02-00-BC-25-09-00-4E-36");
+            postDic.Add("_client_type", "4");
+            postDic.Add("_client_version", "1.2.1.17");
+            postDic.Add("_phone_imei", "540b43b59d21b7a4824e1fd31b08e9a6");
+            postDic.Add("fid", fid);
+            postDic.Add("kw", kw);
+            postDic.Add("net_type", "3");
+            postDic.Add("tbs", GetTbs(bduss));
+            postDic.Add("sign", Tran(postDic));
+
+            return SignInPost(TieBaInterface.ClientSign_URL, postDic, bduss).ToString();
+        }
+
+        //PC端网页签到
+        public static string PCSignIn(string bduss)
+        {
+            string result = string.Empty;
+            List<MyTieBa> tiebalist = GetUserTieBa(bduss);
+            for (int i = 0; i < tiebalist.Count; i++)
+            {
+                Dictionary<string, string> dic = new Dictionary<string, string>();
+                dic.Add("ie", "utf-8");
+                dic.Add("kw", tiebalist[i].TBName);
+                dic.Add("tbs", GetTbs(bduss));
+                JObject Jresult = SignInPost(TieBaInterface.PCSignIn_URL, dic, bduss);
+                result = Jresult["no"].ToString();
+
+            }
+            return result;
+        }
+
+
+        //获取贴吧的fid
+        public static string GetFid(string name)
+        {
+            JObject JData = (JObject)JsonConvert.DeserializeObject(DownloadStreamString(TieBaInterface.GetFid_URL+name));
+            string fid = JData["data"]["fid"].ToString();
+            return fid;
+        }
+
+        //获取tbs
+        public static string GetTbs(string bduss)
+        {
+            WebClient client = new WebClient();
+            client.Headers.Add("Cookie", bduss);
+            Stream st = client.OpenRead(TieBaInterface.GetTbs_URL);
+            StreamReader sr = new StreamReader(st);
+            string res = sr.ReadToEnd();
+            sr.Close();
+            st.Close();
+            JObject Jres = (JObject)JsonConvert.DeserializeObject(res);
+            return Jres["tbs"].ToString();
+        }
+
+        //客户端Sign加密转换
+        public static string Tran(Dictionary<string, string> dic)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in dic)
+            {
+                sb.AppendFormat("{0}={1}", item.Key, item.Value);
+            }
+            sb.Append("tiebaclient!!!");
+            return Md5(sb.ToString()).ToUpper();
+        }
+
+        //MD5加密字符串
+        public static string Md5(string input)
+        {
+            MD5 md5 = new MD5CryptoServiceProvider();
+            var data = Encoding.UTF8.GetBytes(input);
+            var md5Data = md5.ComputeHash(data);
+            md5.Clear();
+            return md5Data.Aggregate(string.Empty, (current, t) => current + t.ToString(@"x2").PadLeft(2, '0'));
+        }
+
+        //POST
+        public static JObject SignInPost(string url, Dictionary<string, string> dic, string bduss)
+        {
+            string result = "";
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            req.Method = "POST";
+            req.ContentType = "application/json;charset=UTF-8";
+            req.Headers.Add("Cookie", bduss);
+            #region 添加Post 参数
+            StringBuilder builder = new StringBuilder();
+            int i = 0;
+            foreach (var item in dic)
+            {
+                if (i > 0)
+                    builder.Append("&");
+                builder.AppendFormat("{0}={1}", item.Key, item.Value);
+                i++;
+            }
+            byte[] data = Encoding.UTF8.GetBytes(builder.ToString());
+            req.ContentLength = data.Length;
+            using (Stream reqStream = req.GetRequestStream())
+            {
+                reqStream.Write(data, 0, data.Length);
+                reqStream.Close();
+            }
+            #endregion
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            Stream stream = resp.GetResponseStream();
+            //获取响应内容
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                result = reader.ReadToEnd();
+            }
+            return (JObject)JsonConvert.DeserializeObject(result);
         }
 
         //GET
@@ -58,5 +201,6 @@ namespace SignTest.Sign
             read.Close();
             return str;
         }
+
     }
 }
