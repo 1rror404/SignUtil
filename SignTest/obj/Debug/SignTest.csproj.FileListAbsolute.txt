@@ -1,0 +1,6 @@
+E:\Test\贴吧签到\SignTest\SignTest\bin\Debug\SignTest.exe.config
+E:\Test\贴吧签到\SignTest\SignTest\bin\Debug\SignTest.exe
+E:\Test\贴吧签到\SignTest\SignTest\bin\Debug\SignTest.pdb
+E:\Test\贴吧签到\SignTest\SignTest\obj\Debug\SignTest.exe
+E:\Test\贴吧签到\SignTest\SignTest\obj\Debug\SignTest.pdb
+E:\Test\贴吧签到\SignTest\SignTest\obj\Debug\SignTest.csprojResolveAssemblyReference.cache
