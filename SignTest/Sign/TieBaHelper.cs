@@ -106,6 +106,37 @@ namespace SignTest.Sign
             return result;
         }
 
+        //关注贴吧(客户端)
+        public static string AddTieBa(string fid, string kw, string bduss)
+        {
+            string result = string.Empty;
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("BDUSS", bduss.Replace("BDUSS=", ""));
+            dic.Add("fid", fid);
+            dic.Add("kw", kw);
+            dic.Add("tbs", GetTbs(bduss));
+            dic.Add("sign", Tran(dic));
+            JObject Jresult = SignInPost(TieBaInterface.AddTieBa_URL, dic, bduss);
+            result = Jresult["error_code"].ToString();
+            return result;
+        }
+
+        //取消关注贴吧(客户端)
+        public static string RemoveTieBa(string kw, string bduss)
+        {
+            string result = string.Empty;
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("BDUSS", bduss.Replace("BDUSS=", ""));
+            dic.Add("fid", GetFid(kw));
+            dic.Add("kw", kw);
+            dic.Add("tbs", GetTbs(bduss));
+            dic.Add("sign", Tran(dic));
+            JObject Jresult = SignInPost(TieBaInterface.RemoveTieBa_URL, dic, bduss);
+            result = Jresult["error_code"].ToString();
+            return result;
+        }
+
+
 
         //获取贴吧的fid
         public static string GetFid(string name)

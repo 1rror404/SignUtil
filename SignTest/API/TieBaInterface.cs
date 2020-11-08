@@ -9,6 +9,7 @@ namespace SignTest.API
     class TieBaInterface
     {
         public static string bduss = "BDUSS=ByfnBiVkRHSjZYMTdBUTlVWnF5YlIyZkpLOENGaktkQ2ZCb3RQNmFkT2F2TDlmRVFBQUFBJCQAAAAAAAAAAAEAAAD-AFUAzvTI1bO~ueIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJovmF-aL5hfQV";
+      
         public static string PCUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36";   //PC代理
 
         public static string GetTieBa_URL = "http://tieba.baidu.com/mo/m?tn=bdFBW&tab=favorite";             //获取用户关注的贴吧（老）
