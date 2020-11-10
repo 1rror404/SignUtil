@@ -20,7 +20,7 @@ namespace SignTest.Sign
         public static List<MyTieBa> GetUserTieBa(string bduss)
         {
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(DownloadStreamString(TieBaInterface.GetTieBa_URL,bduss));
+            doc.LoadHtml(DownloadStreamString(TieBaInterface.GetTieBa_URL, bduss));
             HtmlNode documentNode = doc.DocumentNode;
             List<MyTieBa> TieBaList = new List<MyTieBa>();
             try
@@ -142,32 +142,34 @@ namespace SignTest.Sign
         {
             try
             {
-                JObject JInfo = (JObject)JsonConvert.DeserializeObject(DownloadStreamString(TieBaInterface.GetInfo_URL,bduss));
-                string code = JInfo["code"].ToString();
-                string username = JInfo["data"]["username"].ToString();
-                string img = JInfo["data"]["portrait"].ToString();
-                if (code == "0")
+                JObject JInfo = (JObject)JsonConvert.DeserializeObject(DownloadStreamString(TieBaInterface.GetInfo_URL, bduss));
+                string code = Convert.ToString(JInfo["code"]);
+                string msg = Convert.ToString(JInfo["message"]);
+                if (code == "0" || msg == "成功")
                 {
+                    string username = Convert.ToString(JInfo["data"]["username"]);
+                    string img = Convert.ToString(JInfo["data"]["portrait"]);
                     return username;
                 }
                 else
                 {
-                    return "1";
+                    return "未获取到用户名";
                 }
             }
             catch (Exception)
             {
-                return "1";
+
+                Console.WriteLine("获取用户信息有误");
                 throw;
             }
-
+           
         }
 
 
         //获取贴吧的fid
         public static string GetFid(string name)
         {
-            JObject JData = (JObject)JsonConvert.DeserializeObject(DownloadStreamString(TieBaInterface.GetFid_URL + name,""));
+            JObject JData = (JObject)JsonConvert.DeserializeObject(DownloadStreamString(TieBaInterface.GetFid_URL + name, ""));
             string fid = JData["data"]["fid"].ToString();
             return fid;
         }
@@ -187,7 +189,8 @@ namespace SignTest.Sign
         }
 
         //判断BDUSS是否有效
-        public static string isExist(string bduss) {
+        public static string isExist(string bduss)
+        {
 
             WebClient client = new WebClient();
             client.Headers.Add("Cookie", bduss);
@@ -259,7 +262,7 @@ namespace SignTest.Sign
         }
 
         //GET
-        public static string DownloadStreamString(string url,string bduss)
+        public static string DownloadStreamString(string url, string bduss)
         {
             WebClient wc = new WebClient();
             wc.Headers.Add("ContentType", "text/html;charset=UTF-8");

@@ -47,25 +47,23 @@ namespace SignTest
 
             Test();
 
-
-
+         
+        
         }
 
         public static void Test()
         {
             List<String> bdussList = new List<String>();
-          
+           
             bdussList.Add("BDUSS=dVdi15YWJGaXVsay1mWH52blNTWE5-MDkycS1VNDJoeENSMVYxNlNQdXpNazlmSVFBQUFBJCQAAAAAAAAAAAEAAAC2-rKb17fDzrqitMoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALOlJ1-zpSdfbm");
             for (int i = 0; i < bdussList.Count; i++)
             {
                 if (TieBaHelper.isExist(bdussList[i]) == "1")
                 {
-
-                    bduss = bdussList[i];
-                    Console.WriteLine("**************************************用户名：" + TieBaHelper.GetUserInfo(bduss) + "  开始签到**************************************");
+                  
                     TieBaHelper.SignAllTieBa(bdussList[i]);
                     Console.WriteLine("**************************************签到完毕**************************************");
-                    SendEmail.SignEmail(TieBaHelper.GetUserInfo(bduss), "3024@163.com");
+                  //  SendEmail.SignEmail("", "3024@163.com");
 
                 }
                 else
